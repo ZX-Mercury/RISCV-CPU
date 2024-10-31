@@ -9,5 +9,3 @@ fpga/
 script/
 testspace/
 testcase/
-.gitignore:Zone.Identifier
-Makefile:Zone.Identifier
