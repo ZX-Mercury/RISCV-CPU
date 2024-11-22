@@ -32,7 +32,7 @@ always @(posedge clk_in)
   begin
     if (rst_in)
       begin
-      
+      $display("cpu: reset\n");
       end
     else if (!rdy_in)
       begin
