@@ -1,4 +1,4 @@
-`include "defines.v"
+`include "definitions.v"
 
 module decoder(
     input wire          clk_in, // system clock signal
