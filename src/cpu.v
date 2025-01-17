@@ -113,7 +113,7 @@ module cpu(
     .ROB2IC_pre_judge(ROB2IC_pre_judge)
   );
 
-  IF if(
+  IF i_f( //"if" is a keyword in verilog
     .clk_in(clk_in),
     .rst_in(rst_in),
     .rdy_in(rdy_in),
@@ -140,7 +140,7 @@ module cpu(
   DP dp(
     .clk_in(clk_in),
     .rst_in(rst_in),
-    .rdy_in(rdy_in),
+    .rdy_in(rdy_in)
     //TODO
   );
 

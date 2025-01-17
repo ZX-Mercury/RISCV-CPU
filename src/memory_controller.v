@@ -113,7 +113,7 @@ always @(posedge clk_in) begin
                     4: MC2LSB_data[31:24] <= RAM2MC_data;
                 endcase
             end
-            if (last_query == iCache && rd_btn == 4 * BLK_WIDTH) begin
+            if (last_query == iCache && rd_btn == 4 * BLOCK_WIDTH) begin
                 MC_state <= MC_IDLE;
                 MC2RAM_addr <= 0;
                 MC2RAM_wr <= 0;

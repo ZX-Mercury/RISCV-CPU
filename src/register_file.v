@@ -65,7 +65,7 @@ always @(posedge clk_in) begin
                 end
             end
             if (DC2RF_en && DC2RF_ROB_index != NON_REG && DC2RF_ROB_index != 0) begin
-                dependency[DC2RF_rd] <= DC2RF_ROB_index;
+                dependency[ROB2RF_rd] <= DC2RF_ROB_index;
             end
         end
     end

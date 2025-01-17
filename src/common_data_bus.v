@@ -28,7 +28,7 @@ module CDB #(
     output wire [ROB_WIDTH-1:0] CDB2LSB_RS_ROB_index,
     output wire [31:0] CDB2LSB_RS_value,
 
-    //ROBS
+    //ROB
     output wire CDB2ROB_RS_en,
     output wire [ROB_WIDTH-1:0] CDB2ROB_RS_ROB_index,
     output wire [31:0] CDB2ROB_RS_value,

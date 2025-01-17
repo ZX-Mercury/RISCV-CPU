@@ -3,9 +3,9 @@ module DP#(
     parameter REG_WIDTH = 5,
     parameter EX_REG_WIDTH = 6,  //extra one bit for empty reg
     parameter NON_REG = 1 << REG_WIDTH,
-    parameter RoB_WIDTH = 4,
-    parameter EX_RoB_WIDTH = 5,
-    parameter NON_DEP = 1 << RoB_WIDTH,  //no dependency
+    parameter ROB_WIDTH = 4,
+    parameter EX_ROB_WIDTH = 5,
+    parameter NON_DEP = 1 << ROB_WIDTH,  //no dependency
     parameter IDLE = 0, WAITING_INS = 1,
     parameter LUI     =7'b0000001,
     parameter AUIPC   =7'b0000010,
@@ -67,12 +67,26 @@ module DP#(
     output reg DP2RF_en,
     output reg [EX_REG_WIDTH-1:0] DP2RF_rd,
     output reg [31:0] DP2RF_data,
-    output reg [ROB_WIDTH - 1:0] DPRF_RoB_index,
+    output reg [ROB_WIDTH - 1:0] DPRF_ROB_index,
     output wire [EX_REG_WIDTH - 1:0] DPRF_rs2,
 
     //LSB
 
     //ROB
+    input wire ROB2DP_full,
+    input wire [ROB_WIDTH - 1:0] ROB2DP_ROB_index,
+    input wire ROB2DP_pre_judge,
+    input wire ROB2DP_Qj_ready,
+    input wire ROB2DP_Qk_ready,
+    input wire [31:0] ROB2DP_Vj,
+    input wire [31:0] ROB2DP_Vk,
+    output wire [EX_ROB_WIDTH - 1:0] DP2ROB_Qj,
+    output wire [EX_ROB_WIDTH - 1:0] DP2ROB_Qk,
+    output reg DP2ROB_en,
+    output reg [ADDR_WIDTH - 1:0] DP2ROB_pc,
+    output reg DP2ROB_predict_result,
+    output reg [6:0] DP2ROB_opcode,
+    output reg [EX_REG_WIDTH - 1:0] DP2ROB_rd
 );
 
 endmodule

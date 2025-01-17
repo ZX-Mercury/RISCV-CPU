@@ -1,4 +1,16 @@
-module ROB(
+module ROB#(
+    parameter ADDR_WIDTH = 32,
+    parameter REG_WIDTH = 5,
+    parameter EX_REG_WIDTH = 6,
+    parameter NON_REG = 1 << REG_WIDTH,
+    parameter ROB_WIDTH = 4,
+    parameter EX_ROB_WIDTH = 5,
+    parameter ROB_SIZE = 1 << ROB_WIDTH,
+    parameter LSB_WIDTH = 3,
+    parameter EX_LSB_WIDTH = 4,
+    parameter LSB_SIZE = 1 << LSB_WIDTH,
+    parameter NON_DEP = 1 << ROB_WIDTH
+)(
     //System
     input Sys_clk,
     input Sys_rst,
