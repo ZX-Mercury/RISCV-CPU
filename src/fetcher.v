@@ -6,7 +6,8 @@ module IF #(
     parameter CACHE_WIDTH = 8,
     parameter CACHE_SIZE = 1 << CACHE_WIDTH,
     parameter BLOCK_NUM = 1 << CACHE_WIDTH,
-    parameter WORK=1, PAUSE=0
+    parameter WORK=1, PAUSE=0,
+    parameter NONINST = 32'hFFFFFFFF
 )
 (
     input wire clk_in,
@@ -23,16 +24,16 @@ module IF #(
     input wire DC2IF_query_inst,
     output reg IF2DC_en,
     output reg [ADDR_WIDTH-1:0] IF2DC_pc,
-    output reg [6:0] IF2DC_opcode,
-    output reg [31:7] IF2DC_exop,
+    output wire [6:0] IF2DC_opcode,
+    output wire [31:7] IF2DC_exop,
 
     // reorder buffer
-    input wire RoB2IF_pre_judge,
-    input wire RoB2IF_branch_result,
-    input wire RoB2IF_jalr_en,
-    input wire RoB2IF_branch_en,
-    input wire [ADDR_WIDTH - 1:0] RoB2IF_branch_pc,
-    input wire [ADDR_WIDTH - 1:0] RoB2IF_next_pc
+    input wire ROB2IF_pre_judge,
+    input wire ROB2IF_branch_result,
+    input wire ROB2IF_jalr_en,
+    input wire ROB2IF_branch_en,
+    input wire [ADDR_WIDTH - 1:0] ROB2IF_branch_pc,
+    input wire [ADDR_WIDTH - 1:0] ROB2IF_next_pc
 );
 
 wire [31:0] imm;
@@ -48,7 +49,6 @@ assign IF2DC_exop = IC2IF_data[31:7];
 assign imm = (IF2DC_opcode == 7'b1101111) ? {{12{IC2IF_data[31]}},IC2IF_data[19:12],IC2IF_data[20],IC2IF_data[30:21],1'b0}  //jal
     :(IF2DC_opcode == 7'b1100011) ? {{20{IC2IF_data[31]}},IC2IF_data[7],IC2IF_data[30:25],IC2IF_data[11:8],1'b0}  //branch
     : 32'b0;
-assign IF2DC_pc = pc;
 
 always @(posedge clk_in) begin
     if (rst_in) begin
@@ -58,14 +58,14 @@ always @(posedge clk_in) begin
         stop_fetch <= 0;
         instr <= NONINST;
     end else if (rdy_in) begin
-        if (!RoB2IC_pre_judge) begin
-            pc <= RoBIF_next_pc;
+        if (!ROB2IF_pre_judge) begin
+            pc <= ROB2IF_next_pc;
             IF_state <= WORK;
             IF2DC_en <= 0;
             stop_fetch <= 0;
         end else begin
-            if (IF_state == work && IC2IF_en && DC2IF_query_inst) begin
-                case (opcode)
+            if (IF_state == WORK && IC2IF_en && DC2IF_query_inst) begin
+                case (IF2DC_opcode)
                     7'b1101111: begin
                         pc <= pc + imm;
                         IF2DC_pc <= pc;

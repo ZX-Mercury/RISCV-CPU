@@ -69,10 +69,101 @@ module cpu(
   wire [31:0] RS2CDB_value;
   wire [ADDR_WIDTH-1:0] RS2DCB_next_pc;
 
+  MC mc(
+    .clk_in(clk_in),
+    .rst_in(rst_in),
+    .rdy_in(rdy_in),
+    .io_buffer_full(io_buffer_full),
+    
+    .RAM2MC_data(mem_din),
+    .MC2RAM_data(mem_dout),
+    .MC2RAM_addr(mem_a),
+    .MC2RAM_wr(mem_wr),
+    
+    .IC2MC_addr(IC2MC_addr),
+    .IC2MC_en(IC2MC_en),
+    .MC2IC_block(MC2IC_block),
+    .MC2IC_en(MC2IC_en),
 
+    .LSB2MC_en(LSB2MC_en),
+    .LSB2MC_wr(LSB2MC_wr),
+    .LSB2MC_data_width(LSB2MC_data_width),
+    .LSB2MC_data(LSB2MC_data),
+    .LSB2MC_addr(LSB2MC_addr),
+    .MC2LSB_r_en(MC2LSB_r_en),
+    .MC2LSB_w_en(MC2LSB_w_en),
+    .MC2LSB_data(MC2LSB_data)
+  );
 
+  IC ic(
+    .clk_in(clk_in),
+    .rst_in(rst_in),
+    .rdy_in(rdy_in),
 
+    .MC2IC_block(MC2IC_block),
+    .MC2IC_en(MC2IC_en),
+    .IC2MC_addr(IC2MC_addr),
+    .IC2MC_en(IC2MC_en),
+    
+    .IF2IC_en(IF2IC_en),
+    .IF2IC_addr(IF2IC_addr),
+    .IC2IF_en(IC2IF_en),
+    .IC2IF_data(IC2IF_data),
 
+    .ROB2IC_pre_judge(ROB2IC_pre_judge)
+  );
+
+  IF if(
+    .clk_in(clk_in),
+    .rst_in(rst_in),
+    .rdy_in(rdy_in),
+
+    .IC2IF_en(IC2IF_en),
+    .IC2IF_data(IC2IF_data),
+    .IF2IC_en(IF2IC_en),
+    .IF2IC_addr(IF2IC_addr),
+    
+    .DC2IF_query_inst(DC2IF_query_inst),
+    .IF2DC_en(IF2DC_en),
+    .IF2DC_pc(IF2DC_pc),
+    .IF2DC_opcode(IF2DC_opcode),
+    .IF2DC_exop(IF2DC_exop),
+
+    .ROB2IF_pre_judge(ROB2IF_pre_judge),
+    .ROB2IF_branch_result(ROB2IF_branch_result),
+    .ROB2IF_jalr_en(ROB2IF_jalr_en),
+    .ROB2IF_branch_en(ROB2IF_branch_en),
+    .ROB2IF_branch_pc(ROB2IF_branch_pc),
+    .ROB2IF_next_pc(ROB2IF_next_pc)
+  );
+
+  DP dp(
+    .clk_in(clk_in),
+    .rst_in(rst_in),
+    .rdy_in(rdy_in),
+    //TODO
+  );
+
+  DC dc(
+    .clk_in(clk_in),
+    .rst_in(rst_in),
+    .rdy_in(rdy_in),
+
+    .IF2DC_en(IF2DC_en),
+    .IF2DC_pc(IF2DC_pc),
+    .IF2DC_opcode(IF2DC_opcode),
+    .IF2DC_exop(IF2DC_exop),
+    .DC2IF_query_inst(DC2IF_query_inst),
+    
+    .DP2DC_query_inst(DP2DC_query_inst),
+    .DC2DP_en(DC2DP_en),
+    .DC2DP_pc(DC2DP_pc),
+    .DC2DP_opcode(DC2DP_opcode),
+    .DC2DP_rs1(DC2DP_rs1),
+    .DC2DP_rs2(DC2DP_rs2),
+    .DC2DP_rd(DC2DP_rd),
+    .DC2DP_imm(DC2DP_imm)
+  );
 
 // Specifications:
 // - Pause cpu(freeze pc, registers, etc.) when rdy_in is low

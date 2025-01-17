@@ -57,6 +57,7 @@ wire [EX_RS_WIDTH-1:0]    ready_tail;
 integer i;
 always @(posedge clk_in)begin
     if(rst_in) begin
+        RS2CDB_en <= 0;
         for(i=0; i<RS_SIZE; i=i+1)begin
             op[i] <= 0;
             Qj[i] <= 0;
@@ -68,7 +69,43 @@ always @(posedge clk_in)begin
         end
     end
     else if (rdy_in) begin
-        
+        if (DP2RS_en && !RS2DP_full) begin
+            if (DP2RS_Qj != NON_DEP) begin
+            if (RS2CDB_en && RS2CDB_ROB_index == DP2RS_Qj) begin
+                Qj[idle_head] <= NON_DEP;
+                Vj[idle_head] <= RS2CDB_value;
+            end else if (CD2BRS_LSB_en && CD2BRS_LSB_ROB_index == DP2RS_Qj) begin
+                Qj[idle_head] <= NON_DEP;
+                Vj[idle_head] <= CD2BRS_LSB_value;
+            end else begin
+                Qj[idle_head] <= DP2RS_Qj;
+                Vj[idle_head] <= DP2RS_Vj;
+            end
+            end else begin
+            Qj[idle_head] <= NON_DEP;
+            Vj[idle_head] <= DP2RS_Vj;
+            end
+            if (DP2RS_Qk != NON_DEP) begin
+            if (RS2CDB_en && RS2CDB_ROB_index == DP2RS_Qk) begin
+                Qk[idle_head] <= NON_DEP;
+                Vk[idle_head] <= RS2CDB_value;
+            end else if (CDB2RS_LSB_en && CDB2RS_LSB_ROB_index == DP2RS_Qk) begin
+                Qk[idle_head] <= NON_DEP;
+                Vk[idle_head] <= CDB2RS_LSB_value;
+            end else begin
+                Qk[idle_head] <= DP2RS_Qk;
+                Vk[idle_head] <= DP2RS_Vk;
+            end
+            end else begin
+            Qk[idle_head] <= NON_DEP;
+            Vk[idle_head] <= DP2RS_Vk;
+            end
+            ROB_index[idle_head] <= DP2RS_ROB_index;
+            opcode[idle_head] <= DP2RS_opcode;
+            imm[idle_head] <= DP2RS_imm;
+            busy[idle_head] <= 1;
+            A[idle_head] <= DP2RS_pc;
+      end
     end
     else begin
     end

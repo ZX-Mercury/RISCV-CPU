@@ -46,9 +46,9 @@ module CDB #(
     output wire [31:0] CDB2DP_LSB_value
 );
 
-    assign CDBRS_LSB_en = LSB2CDB_en;
-    assign CDBRS_LSB_ROB_index = LSB2CDB_ROB_index;
-    assign CDBRS_LSB_value = LSB2CDB_value;
+    assign CDB2RS_LSB_en = LSB2CDB_en;
+    assign CDB2RS_LSB_ROB_index = LSB2CDB_ROB_index;
+    assign CDB2RS_LSB_value = LSB2CDB_value;
     assign CDB2LSB_RS_en = RS2CDB_en;
     assign CDB2LSB_RS_ROB_index = RS2CDB_ROB_index;
     assign CDB2LSB_RS_value = RS2CDB_value;

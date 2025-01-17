@@ -81,10 +81,10 @@ always @(posedge clk_in) begin
                 IC_state <= WORK;
                 IC2MC_en <= 0;
                 if (!disgard) begin
-                    block_data[IC2MC_index][IC2MC_block_offset] <= IC2MC_block;//data
+                    block_data[IC2MC_index][IC2MC_block_offset] <= MC2IC_block;//data
                     block_tag[IC2MC_index] <= IC2MC_tag;
                     block_valid[IC2MC_index] <= 1;
-                    IF2IC_en <= 1;
+                    IC2IF_en <= 1;
                     case (IF2IC_block_offset)
                         0: IC2IF_data <= MC2IC_block[31:0];
                         1: IC2IF_data <= MC2IC_block[63:32];
