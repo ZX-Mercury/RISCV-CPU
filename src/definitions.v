@@ -35,4 +35,4 @@
 `define SRL     6'b100010
 `define SRA     6'b100011
 `define OR      6'b100100
-`define AND     6'b100101
+`define AND     6'b100101 

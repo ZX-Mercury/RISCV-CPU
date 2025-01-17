@@ -17,6 +17,62 @@ module cpu(
 );
 
 // implementation goes here
+  parameter BLOCK_WIDTH = 1;
+  parameter BLOCK_SIZE = 1 << BLOCK_WIDTH;
+  parameter CACHE_WIDTH = 8;
+  parameter BLOCK_NUM = 1 << CACHE_WIDTH;
+  parameter ADDR_WIDTH = 32;
+  parameter REG_WIDTH = 5;
+  parameter EX_REG_WIDTH = 6;
+  parameter NON_REG = 1 << REG_WIDTH;
+  parameter ROB_WIDTH = 4;
+  parameter EX_ROB_WIDTH = 5;
+  parameter LSB_WIDTH = 3;
+  parameter EX_LSB_WIDTH = 4;
+  parameter LSB_SIZE = 1 << LSB_WIDTH;
+  parameter NON_DEP = 1 << ROB_WIDTH;
+  parameter LSB = 0, ICACHE = 1, IDLE = 0, READ = 1, WRITE = 2;
+
+  //MC
+  wire [BLOCK_SIZE*32-1:0] MC2IC_block;
+  wire MC2IC_en;
+  wire MC2LSB_r_en;
+  wire MC2LSB_w_en;
+  wire [31:0] MC2LSB_data;
+  //IC
+  wire [ADDR_WIDTH-1:0] IC2MC_addr;
+  wire IC2MC_en;
+  wire IC2IF_en;
+  wire [31:0]IC2IF_data;
+  //IF
+  wire IF2IC_en;
+  wire [ADDR_WIDTH-1:0] IF2IC_addr;
+  wire IF2DC_en;
+  wire [ADDR_WIDTH-1:0] IF2DC_pc;
+  wire [6:0] IF2DC_opcode;
+  wire [31:7] IF2DC_exop;
+  //DC
+  wire DC2IF_query_inst;
+  wire DC2DP_en;
+  wire [ADDR_WIDTH-1:0] DC2DP_pc;
+  wire [6:0]   DC2DP_opcode;
+  wire [REG_WIDTH-1:0]  DC2DP_rs1;
+  wire [REG_WIDTH-1:0]  DC2DP_rs2;
+  wire [REG_WIDTH-1:0]  DC2DP_rd;
+  wire [31:0]  DC2DP_imm;
+  //DP
+
+  //RS
+  wire RS2DP_full;
+  wire RS2CDB_en;
+  wire [ROB_WIDTH-1:0] RS2CDB_ROB_index;
+  wire [31:0] RS2CDB_value;
+  wire [ADDR_WIDTH-1:0] RS2DCB_next_pc;
+
+
+
+
+
 
 // Specifications:
 // - Pause cpu(freeze pc, registers, etc.) when rdy_in is low
@@ -32,7 +88,6 @@ always @(posedge clk_in)
   begin
     if (rst_in)
       begin
-      $display("cpu: reset\n");
       end
     else if (!rdy_in)
       begin

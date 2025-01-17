@@ -1,50 +1,63 @@
-`include "definitions.v"
-module MC{
-    input   wire clk_in;
-    input   wire rst_in;
-    input   wire rdy_in;
+module MC#(
+    parameter BLOCK_WIDTH = 1,
+    parameter BLOCK_SIZE = 1<<BLOCK_WIDTH,
+    parameter CACHE_SIZE = 8,
+    parameter BLOCK_NUM = 1<<CACHE_SIZE,
+    parameter ADDR_WIDTH = 32,
+    parameter REG_WIDTH = 5,
+    parameter EX_REG_WIDTH = 6,
+    parameter NON_REG = 0,
+    parameter ROB_WIDTH = 4,
+    parameter EX_ROB_WIDTH = 5,
+    parameter LSB_WIDTH = 3,
+    parameter EX_LSB_WIDTH = 4,
+    parameter LSB_SIZE = 1<<LSB_WIDTH,
+    parameter NON_DEP = 1<<ROB_WIDTH,
+    parameter LSB=0, ICACHE = 1,
+    parameter MC_IDLE = 0, MC_READ = 1, MC_WRITE = 2
+)
+
+(
+    input   wire clk_in,
+    input   wire rst_in,
+    input   wire rdy_in,
+    input   wire io_buffer_full,
 
     //ram
-    input   wire    [7:0]    RAM2MC_data;
-    output  reg     [7:0]    MC2RAM_data;
-    output  reg     [31:0]   MC2RAM_addr;
-    output  reg              MC2RAM_wr;
+    input   wire    [7:0]    RAM2MC_data,
+    output  reg     [7:0]    MC2RAM_data,
+    output  reg     [31:0]   MC2RAM_addr,
+    output  reg              MC2RAM_wr,
 
     //iCache
-    input   reg     [ADDER_WIDTH-1:0]   IC2MC_addr,
+    input   wire    [ADDR_WIDTH-1:0]   IC2MC_addr,
     input   wire                        IC2MC_en,
-    output  wire    [BLK_WIDTH:0][31:0] MC2IC_block,
-    output  wire                        MC2IC_en,
+    output  reg     [BLOCK_WIDTH:0][31:0] MC2IC_block,
+    output  reg                         MC2IC_en,
 
     //Load Store Buffer
-    input  wire                    LSB2MC_en,
-    input  wire                    LSB2MC_wr,          // 0:read,1:write
-    input  wire [             2:0] LSB2MC_data_width,  //0:byte,1:hw,2:w
-    input  wire [            31:0] LSB2MC_data,
+    input  wire LSB2MC_en,
+    input  wire LSB2MC_wr,          // 0:read,1:write
+    input  wire [2:0] LSB2MC_data_width,  //0:byte,1:hw,2:w
+    input  wire [31:0] LSB2MC_data,
     input  wire [ADDR_WIDTH - 1:0] LSB2MC_addr,
-    output reg                     MC2LSB_r_en,
-    output reg                     MC2LSB_w_en,
-    output reg  [            31:0] MC2LSB_data
-};
+    output reg  MC2LSB_r_en,
+    output reg  MC2LSB_w_en,
+    output reg  [31:0] MC2LSB_data
+);
 
-parameter
-    MC_IDLE = 0,
-    MC_READ = 1,
-    MC_WRITE = 2;
-
-wire stop_write;
 reg [2:0] MC_state;     //0: idle, 1: read, 2: write
 reg [3 + BLOCK_WIDTH - 1:0] rd_btn;
 reg [2:0] wr_btn;
 reg last_query;
 wire stop_write;  // 1 if uart buffer is full write to address 0x30000 or 0x30004.
 
-assign stop_write = io_buffer_full && LSBMC_en && LSBMC_wr && (LSBMC_addr == 32'h30000 || LSBMC_addr == 32'h30004);
+assign stop_write = (io_buffer_full && LSB2MC_en && LSBMC_wr && (LSB2MC_addr == 32'h30000 || LSB2MC_addr == 32'h30004))?1:0;
 
 always @(posedge clk_in) begin
     if (rst_in) begin
         MC_state <= MC_IDLE;
-        last_query <= 0;
+        last_query <= LSB;
         wr_btn <= 0;
         rd_btn <= 0;
         MC2LSB_r_en <= 0;
@@ -58,13 +71,13 @@ always @(posedge clk_in) begin
             MC2LSB_r_en <= 0;
             MC2LSB_w_en <= 0;
             MC2IC_en <= 0;
-            if (IC2MC_en && !MC2IC_en) begin
+            if (IC2MC_en && !MC2IC_en &&(!LSB2MC_en || last_query == LSB)) begin
                 MC_state <= MC_READ;
                 rd_btn <= 0;
                 last_query <= iCache;
                 MC2RAM_addr <= IC2MC_addr;
                 MC2RAM_wr <= 0;
-            end else if (LSB2MC_en && ) begin
+            end else if (LSB2MC_en) begin
                 MC_state <= LSB2MC_wr ? MC_WRITE : MC_READ;
                 rd_btn <= 0;
                 last_query <= LSB;

@@ -14,10 +14,10 @@ module IF #(
     input wire rdy_in,
 
     // icache
-    input wire IF2IC_en,
+    input wire IC2IF_en,
     input wire [31:0] IC2IF_data,
     output wire IF2IC_en,
-    output wire [ADDER_WIDTH-1:0]IF2IC_addr,
+    output wire [ADDR_WIDTH-1:0]IF2IC_addr,
 
     // decoder
     input wire DC2IF_query_inst,
@@ -65,13 +65,13 @@ always @(posedge clk_in) begin
             stop_fetch <= 0;
         end else begin
             if (IF_state == work && IC2IF_en && DC2IF_query_inst) begin
-                case opcode:
-                    JAL: begin
+                case (opcode)
+                    7'b1101111: begin
                         pc <= pc + imm;
                         IF2DC_pc <= pc;
                         IF2DC_en <= 1;
                     end
-                    JALR: begin
+                    7'b1100111: begin
                         IF_state <= PAUSE;
                         stop_fetch <= 1;
                         IF2DC_pc <= pc;
@@ -83,6 +83,8 @@ always @(posedge clk_in) begin
                         IF2DC_en <= 1;
                     end
                 endcase
+            end else begin//不可以继续取指
+                IF2DC_en <= 0;
             end
         end
     end
